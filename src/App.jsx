@@ -6,38 +6,42 @@ import Card from "@mui/material/Card";
 import { Box, Button, CardContent, TextField } from "@mui/material";
 
 function App() {
-  const [emailInput, setEmailInput] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState([]);
+  const initialValues = { mailAddress: "", password: "" };
+  const [formValues, setFormValues] = useState(initialValues);
+  const [formErrors, setFormErrors] = useState([]);
 
-  function handleSubmit() {
-    const errorsArray = [];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+    console.log(formValues);
+  };
 
-    if (emailInput === "") {
-      errorsArray.push("email");
-      alert("Emailを入力してください");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setFormErrors(validate(formValues));
+  };
+
+  const validate = (values) => {
+    const errors = {};
+    const regex =
+      /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/;
+    if (!values.mailAddress) {
+      errors.mailAddress = "メールアドレスを入力してください";
+    } else if (!regex.test(values.mailAddress)) {
+      errors.mailAddress = "正しいメールアドレスを入力してください";
     }
-
-    if (password === "") {
-      errorsArray.push("password");
-      alert("passwordを入力してください");
+    if (!values.password) {
+      errors.password = "パスワードを入力してください";
+    } else if (values.password.length < 4) {
+      errors.password = "4文字以上で入力してください";
     }
-
-    if (emailInput === "" || password === "") {
-      setErrors(errorsArray);
-      alert("未入力の項目があります");
-      return;
-    }
-
-    setErrors([]);
-
-    alert(`Email: ${emailInput}\nPassword: ${password}`);
-  }
+    return errors;
+  };
 
   return (
     <>
       <Card>
-        <CardContent>
+        <CardContent onSubmit={(e) => handleSubmit(e)}>
           <Box
             sx={{
               display: "flex",
@@ -46,20 +50,20 @@ function App() {
             }}
           >
             <TextField
+              error={formErrors.mailAddress}
+              helperText={formErrors.mailAddress}
               label="Email"
               variant="standard"
-              error={errors.includes("email")}
-              helperText={errors.includes("email") ? "入力してください" : ""}
               sx={{ marginBottom: "1rem" }}
-              onChange={(e) => setEmailInput(e.target.value)}
+              onChange={(e) => handleChange(e)}
             />
             <TextField
+              error={formErrors.password}
+              helperText={formErrors.password}
               label="Password"
-              variant="standard"
-              error={errors.includes("password")}
-              helperText={errors.includes("password") ? "入力してください" : ""}
               type="password"
-              onChange={(e) => setPassword(e.target.value)}
+              variant="standard"
+              onChange={(e) => handleChange(e)}
             />
           </Box>
           <Button variant="contained" onClick={handleSubmit}>
